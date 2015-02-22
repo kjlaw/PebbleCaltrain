@@ -1,13 +1,18 @@
 package com.kristen.pebblecaltrain;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.getpebble.android.kit.PebbleKit;
+import com.getpebble.android.kit.PebbleKit.PebbleDataReceiver;
+import com.getpebble.android.kit.util.PebbleDictionary;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -17,10 +22,15 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
+import java.util.UUID;
+
 public class TransportStats extends Activity implements ConnectionCallbacks,
         OnConnectionFailedListener, LocationListener {
 
     private static final String TAG = TransportStats.class.getSimpleName();
+    private static final UUID PEBBLE_APP_UUID = UUID.fromString("3dae475a-3873-4a8a-a3f8-c27571a422ea");
+    private static final int KEY_ONE_DATA = 1;
+    private static final int KEY_TWO_DATA = 2;
 
     private Location mLastLocation;
     private Location mTargetLocation;
@@ -28,6 +38,7 @@ public class TransportStats extends Activity implements ConnectionCallbacks,
     private LocationRequest mLocationRequest;
     private TextView mLocation;
     private float mDistance;
+    private PebbleDataReceiver mReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,6 +82,8 @@ public class TransportStats extends Activity implements ConnectionCallbacks,
         if (mGoogleApiClient.isConnected()) {
             startLocationUpdates();
         }
+
+        receiveCompletion();
     }
 
     @Override
@@ -85,6 +98,7 @@ public class TransportStats extends Activity implements ConnectionCallbacks,
     protected void onPause() {
         super.onPause();
         stopLocationUpdates();
+        unregisterReceiver(mReceiver);
     }
 
     /**
@@ -191,7 +205,7 @@ public class TransportStats extends Activity implements ConnectionCallbacks,
 
         Toast.makeText(getApplicationContext(), "Location changed!", Toast.LENGTH_SHORT).show();
 
-        // TODO: is this call correct? also call in onConnected after startLocationUpdates?
+        // TODO: is this call correct? also call in onConnected after startLocationUpdates? is receiveCompletion correct?
         checkDistance(mLastLocation, mTargetLocation);
 
         // Displaying the new location on UI
@@ -199,11 +213,70 @@ public class TransportStats extends Activity implements ConnectionCallbacks,
     }
 
     public void checkDistance(Location current_loc, Location target_loc) {
-        if (current_loc.distanceTo(target_loc) < 850) { // 850 meters is about .5 miles
+        if (current_loc.distanceTo(target_loc) < 3000) { // 850 meters is about .5 miles
             // send notification to pebble
+            sendNotification();
             Log.d(TAG, "distance: " + current_loc.distanceTo(target_loc));
         } else {
             Log.d(TAG, "distance: " + current_loc.distanceTo(target_loc));
         }
+    }
+
+    public void sendNotification() {
+        boolean connected = PebbleKit.isWatchConnected(getApplicationContext());
+        Log.i(getLocalClassName(), "Pebble is " + (connected ? "connected" : "not connected"));
+
+        PebbleDictionary data = new PebbleDictionary();
+        data.addString(KEY_ONE_DATA, "Wake up, dude!");
+        PebbleKit.sendDataToPebble(getApplicationContext(), PEBBLE_APP_UUID, data);
+
+        PebbleKit.registerReceivedAckHandler(getApplicationContext(), new PebbleKit.PebbleAckReceiver(PEBBLE_APP_UUID) {
+
+            @Override
+            public void receiveAck(Context context, int transactionId) {
+                Log.i(getLocalClassName(), "Received ack for transaction " + transactionId);
+            }
+
+        });
+
+        PebbleKit.registerReceivedNackHandler(getApplicationContext(), new PebbleKit.PebbleNackReceiver(PEBBLE_APP_UUID) {
+
+            @Override
+            public void receiveNack(Context context, int transactionId) {
+                Log.i(getLocalClassName(), "Received nack for transaction " + transactionId);
+            }
+
+        });
+    }
+
+    public void receiveCompletion() {
+
+        final Handler handler = new Handler();
+
+        mReceiver = new PebbleDataReceiver(PEBBLE_APP_UUID) {
+
+            @Override
+            public void receiveData(Context context, int transactionId, PebbleDictionary data) {
+
+                final String received = data.getString(KEY_TWO_DATA);
+
+                Log.i(getLocalClassName(), "Received value=" + data.getString(KEY_TWO_DATA) + " for key: 2");
+
+                handler.post(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        if (received.equals("complete")) {
+                            stopLocationUpdates();
+                        }
+                    }
+
+                });
+
+                PebbleKit.sendAckToPebble(getApplicationContext(), transactionId);
+            }
+        };
+
+        PebbleKit.registerReceivedDataHandler(this, mReceiver);
     }
 }
