@@ -36,19 +36,26 @@ public class TransportStats extends Activity implements ConnectionCallbacks,
     private Location mTargetLocation;
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
+    private TextView mDestination;
     private TextView mLocation;
-    private float mDistance;
+    private TextView mDistance;
+    private TextView mSpeed;
     private PebbleDataReceiver mReceiver;
+    private String mDestinationName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_transport_stats);
 
+        mDestination = (TextView) findViewById(R.id.destination);
         mLocation = (TextView) findViewById(R.id.location);
+        mDistance = (TextView) findViewById(R.id.distance);
+        mSpeed = (TextView) findViewById(R.id.speed);
         mTargetLocation = new Location("");
 
         Intent intent = getIntent();
+        mDestinationName = intent.getStringExtra("destination");
         double latitude = intent.getDoubleExtra("latitude", 0);
         double longitude = intent.getDoubleExtra("longitude", 0);
         mTargetLocation.setLatitude(latitude);
@@ -102,9 +109,9 @@ public class TransportStats extends Activity implements ConnectionCallbacks,
     }
 
     /**
-     * Method to display the location on UI
+     * Method to display information about the location on UI
      * */
-    private void displayLocation() {
+    private void displayInformation() {
 
         mLastLocation = LocationServices.FusedLocationApi
                 .getLastLocation(mGoogleApiClient);
@@ -114,7 +121,10 @@ public class TransportStats extends Activity implements ConnectionCallbacks,
             double longitude = mLastLocation.getLongitude();
 
             Log.d(TAG, latitude + ", " + longitude);
+            mDestination.setText(mDestinationName);
             mLocation.setText(latitude + ", " + longitude);
+            mDistance.setText(mLastLocation.distanceTo(mTargetLocation) + " meters");
+            mSpeed.setText(mLastLocation.getSpeed() + " m/s");
 
         } else {
             mLocation.setText("(Couldn't get the location. Make sure location is enabled on the device)");
@@ -188,7 +198,7 @@ public class TransportStats extends Activity implements ConnectionCallbacks,
     public void onConnected(Bundle arg0) {
 
         // Once connected with google api, get the location
-        displayLocation();
+        displayInformation();
 
         startLocationUpdates();
     }
@@ -203,13 +213,12 @@ public class TransportStats extends Activity implements ConnectionCallbacks,
         // Assign the new location
         mLastLocation = location;
 
-        Toast.makeText(getApplicationContext(), "Location changed!", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(getApplicationContext(), "Location changed!", Toast.LENGTH_SHORT).show();
 
-        // TODO: is this call correct? also call in onConnected after startLocationUpdates? is receiveCompletion correct?
         checkDistance(mLastLocation, mTargetLocation);
 
         // Displaying the new location on UI
-        displayLocation();
+        displayInformation();
     }
 
     public void checkDistance(Location current_loc, Location target_loc) {
@@ -227,7 +236,7 @@ public class TransportStats extends Activity implements ConnectionCallbacks,
         Log.i(getLocalClassName(), "Pebble is " + (connected ? "connected" : "not connected"));
 
         PebbleDictionary data = new PebbleDictionary();
-        data.addString(KEY_ONE_DATA, "Wake up, dude!");
+        data.addString(KEY_ONE_DATA, "Wake up,\ndude!");
         PebbleKit.sendDataToPebble(getApplicationContext(), PEBBLE_APP_UUID, data);
 
         PebbleKit.registerReceivedAckHandler(getApplicationContext(), new PebbleKit.PebbleAckReceiver(PEBBLE_APP_UUID) {
@@ -257,6 +266,8 @@ public class TransportStats extends Activity implements ConnectionCallbacks,
 
             @Override
             public void receiveData(Context context, int transactionId, PebbleDictionary data) {
+                PebbleKit.sendAckToPebble(getApplicationContext(), transactionId);
+                Log.d(TAG, "sent ack to pebble");
 
                 final String received = data.getString(KEY_TWO_DATA);
 
@@ -268,12 +279,11 @@ public class TransportStats extends Activity implements ConnectionCallbacks,
                     public void run() {
                         if (received.equals("complete")) {
                             stopLocationUpdates();
+                            finish();
                         }
                     }
 
                 });
-
-                PebbleKit.sendAckToPebble(getApplicationContext(), transactionId);
             }
         };
 

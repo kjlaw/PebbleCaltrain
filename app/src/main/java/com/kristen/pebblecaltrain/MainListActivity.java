@@ -42,22 +42,24 @@ public class MainListActivity extends ListActivity {
 
 
         targetLocation = new Location("");
+        String destination = mStations.get(position);
 
-        if (mStations.get(position).equals("Palo Alto")) {
+        if (destination.equals("Palo Alto")) {
             targetLocation.setLatitude(37.443070);
             targetLocation.setLongitude(-122.164905);
-        } else if (mStations.get(position).equals("Hillsdale")){
+        } else if (destination.equals("Hillsdale")){
             targetLocation.setLatitude(37.537512);
             targetLocation.setLongitude(-122.297996);
-        } else if (mStations.get(position).equals("Millbrae")){
+        } else if (destination.equals("Millbrae")){
             targetLocation.setLatitude(37.599997);
             targetLocation.setLongitude(-122.386529);
-        } else if (mStations.get(position).equals("San Francisco")){
+        } else if (destination.equals("San Francisco")){
             targetLocation.setLatitude(37.776447);
             targetLocation.setLongitude(-122.394318);
         }
 
         Intent intent = new Intent(this, TransportStats.class);
+        intent.putExtra("destination", destination);
         intent.putExtra("latitude", targetLocation.getLatitude());
         intent.putExtra("longitude", targetLocation.getLongitude());
         startActivity(intent);
