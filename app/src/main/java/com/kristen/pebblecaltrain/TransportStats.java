@@ -1,6 +1,7 @@
 package com.kristen.pebblecaltrain;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
@@ -22,9 +23,11 @@ public class TransportStats extends Activity implements ConnectionCallbacks,
     private static final String TAG = TransportStats.class.getSimpleName();
 
     private Location mLastLocation;
+    private Location mTargetLocation;
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
     private TextView mLocation;
+    private float mDistance;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +35,13 @@ public class TransportStats extends Activity implements ConnectionCallbacks,
         setContentView(R.layout.activity_transport_stats);
 
         mLocation = (TextView) findViewById(R.id.location);
+        mTargetLocation = new Location("");
+
+        Intent intent = getIntent();
+        double latitude = intent.getDoubleExtra("latitude", 0);
+        double longitude = intent.getDoubleExtra("longitude", 0);
+        mTargetLocation.setLatitude(latitude);
+        mTargetLocation.setLongitude(longitude);
 
         // First we need to check availability of play services
         if (checkPlayServices()) {
@@ -139,10 +149,8 @@ public class TransportStats extends Activity implements ConnectionCallbacks,
      * Starting the location updates
      * */
     protected void startLocationUpdates() {
-
         LocationServices.FusedLocationApi.requestLocationUpdates(
                 mGoogleApiClient, mLocationRequest, this);
-
     }
 
     /**
@@ -181,10 +189,21 @@ public class TransportStats extends Activity implements ConnectionCallbacks,
         // Assign the new location
         mLastLocation = location;
 
-        Toast.makeText(getApplicationContext(), "Location changed!",
-                Toast.LENGTH_SHORT).show();
+        Toast.makeText(getApplicationContext(), "Location changed!", Toast.LENGTH_SHORT).show();
+
+        // TODO: is this call correct? also call in onConnected after startLocationUpdates?
+        checkDistance(mLastLocation, mTargetLocation);
 
         // Displaying the new location on UI
         displayLocation();
+    }
+
+    public void checkDistance(Location current_loc, Location target_loc) {
+        if (current_loc.distanceTo(target_loc) < 850) { // 850 meters is about .5 miles
+            // send notification to pebble
+            Log.d(TAG, "distance: " + current_loc.distanceTo(target_loc));
+        } else {
+            Log.d(TAG, "distance: " + current_loc.distanceTo(target_loc));
+        }
     }
 }

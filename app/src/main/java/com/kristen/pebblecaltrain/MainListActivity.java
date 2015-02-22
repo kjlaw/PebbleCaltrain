@@ -41,7 +41,7 @@ public class MainListActivity extends ListActivity {
         mAdapter.notifyDataSetChanged();
 
 
-        targetLocation = new Location("dummyprovider");
+        targetLocation = new Location("");
 
         if (mStations.get(position).equals("Palo Alto")) {
             targetLocation.setLatitude(37.443070);
