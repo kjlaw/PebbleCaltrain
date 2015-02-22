@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.widget.Toast;
 
 import java.util.logging.Handler;
 
@@ -18,8 +19,20 @@ public class LocationService extends Service {
         }
 
         public void handleMessage(Message msg) {
-
+            //ACTUALLY DOES JOB
         }
+    }
+
+    public void onCreate() {
+
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Toast.makeText(this, "service starting", Toast.LENGTH_SHORT).show();
+        //obtain message from the mServiceHandler, set arg1, and send the message
+        //SENDS MESSAGE TO START JOB, WHILE KEEPING TRACK OF WHAT WAS COMPLETED
+
     }
 
     public LocationService() {
@@ -31,5 +44,9 @@ public class LocationService extends Service {
     public IBinder onBind(Intent intent) {
         // TODO: Return the communication channel to the service.
         throw new UnsupportedOperationException("Not yet implemented");
+    }
+
+    public void onDestroy () {
+        Toast.makeText(this, "service done", Toast.LENGTH_SHORT).show();
     }
 }
