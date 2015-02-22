@@ -29,6 +29,11 @@
             android:enabled="true"
             android:exported="true" >
         </service>
+
+        <activity
+            android:name=".TransportStats"
+            android:label="@string/title_activity_transport_stats" >
+        </activity>
     </application>
 
 </manifest>

@@ -1,6 +1,8 @@
 package com.kristen.pebblecaltrain;
 
 import android.app.ListActivity;
+import android.content.Intent;
+import android.location.Location;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.CheckBox;
@@ -15,6 +17,7 @@ public class MainListActivity extends ListActivity {
     ListView mStationsListView;
     List<String> mStations;
     ListViewAdapter mAdapter;
+    Location targetLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,5 +39,16 @@ public class MainListActivity extends ListActivity {
         mAdapter.markSelected(position, !checkBox.isChecked());
 
         mAdapter.notifyDataSetChanged();
+
+        //a bunch of if statements that say, if palo alto, set location object to these
+        //coordinates etc.
+        targetLocation = new Location("dummyprovider");
+        targetLocation.setLatitude(37.443557);
+        targetLocation.setLongitude(-122.163331);
+
+        Intent intent = new Intent(this, TransportStats.class);
+        intent.putExtra("latitude", targetLocation.getLatitude());
+        intent.putExtra("longitude", targetLocation.getLongitude());
+        startActivity(intent);
     }
 }
