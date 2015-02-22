@@ -24,7 +24,8 @@ public class MainListActivity extends ListActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mStations = Arrays.asList("Palo Alto", "Hillsdale", "Millbrae", "San Francisco");
+        mStations = Arrays.asList("San Jose", "Sunnyvale", "Palo Alto", "Redwood City",
+                "Hillsdale", "San Mateo", "Millbrae", "So. San Francisco", "San Francisco");
 
         mAdapter = new ListViewAdapter(this, mStations);
         setListAdapter(mAdapter);
@@ -44,15 +45,30 @@ public class MainListActivity extends ListActivity {
         targetLocation = new Location("");
         String destination = mStations.get(position);
 
-        if (destination.equals("Palo Alto")) {
+        if (destination.equals("San Jose")) {
+            targetLocation.setLatitude(37.330402);
+            targetLocation.setLongitude(-121.902124);
+        } else if (destination.equals("Sunnyvale")) {
+            targetLocation.setLatitude(37.378453);
+            targetLocation.setLongitude(-122.030737);
+        } else if (destination.equals("Palo Alto")) {
             targetLocation.setLatitude(37.443070);
             targetLocation.setLongitude(-122.164905);
+        } else if (destination.equals("Redwood City")) {
+            targetLocation.setLatitude(37.485480);
+            targetLocation.setLongitude(-122.231941);
         } else if (destination.equals("Hillsdale")){
             targetLocation.setLatitude(37.537512);
             targetLocation.setLongitude(-122.297996);
+        } else if (destination.equals("San Mateo")){
+            targetLocation.setLatitude(37.568218);
+            targetLocation.setLongitude(-122.324003);
         } else if (destination.equals("Millbrae")){
             targetLocation.setLatitude(37.599997);
             targetLocation.setLongitude(-122.386529);
+        } else if (destination.equals("So. San Francisco")){
+            targetLocation.setLatitude(37.655852);
+            targetLocation.setLongitude(-122.405434);
         } else if (destination.equals("San Francisco")){
             targetLocation.setLatitude(37.776447);
             targetLocation.setLongitude(-122.394318);
