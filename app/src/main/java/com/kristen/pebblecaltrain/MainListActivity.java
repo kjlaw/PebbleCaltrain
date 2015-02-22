@@ -40,11 +40,22 @@ public class MainListActivity extends ListActivity {
 
         mAdapter.notifyDataSetChanged();
 
-        //a bunch of if statements that say, if palo alto, set location object to these
-        //coordinates etc.
+
         targetLocation = new Location("dummyprovider");
-        targetLocation.setLatitude(37.443557);
-        targetLocation.setLongitude(-122.163331);
+
+        if (mStations.get(position).equals("Palo Alto")) {
+            targetLocation.setLatitude(37.443070);
+            targetLocation.setLongitude(-122.164905);
+        } else if (mStations.get(position).equals("Hillsdale")){
+            targetLocation.setLatitude(37.537512);
+            targetLocation.setLongitude(-122.297996);
+        } else if (mStations.get(position).equals("Millbrae")){
+            targetLocation.setLatitude(37.599997);
+            targetLocation.setLongitude(-122.386529);
+        } else if (mStations.get(position).equals("San Francisco")){
+            targetLocation.setLatitude(37.776447);
+            targetLocation.setLongitude(-122.394318);
+        }
 
         Intent intent = new Intent(this, TransportStats.class);
         intent.putExtra("latitude", targetLocation.getLatitude());
