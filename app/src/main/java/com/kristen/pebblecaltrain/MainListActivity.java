@@ -74,7 +74,7 @@ public class MainListActivity extends ListActivity {
             targetLocation.setLongitude(-122.394318);
         }
 
-        Intent intent = new Intent(this, TransportStats.class);
+        Intent intent = new Intent(this, StatsActivity.class);
         intent.putExtra("destination", destination);
         intent.putExtra("latitude", targetLocation.getLatitude());
         intent.putExtra("longitude", targetLocation.getLongitude());

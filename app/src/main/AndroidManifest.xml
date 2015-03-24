@@ -24,11 +24,21 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".TransportStats"
             android:label="@string/title_activity_transport_stats"
             android:screenOrientation="portrait" >
+        </activity>
+
+        <service
+            android:name=".LocationService"
+            android:enabled="true"
+            android:exported="true" >
+        </service>
+
+        <activity
+            android:name=".StatsActivity"
+            android:label="@string/title_activity_stats" >
         </activity>
     </application>
 
